@@ -1,8 +1,7 @@
 const { 
     default: makeWASocket, 
     useMultiFileAuthState, 
-    DisconnectReason, 
-    makeInMemoryStore,
+    DisconnectReason,
     fetchLatestBaileysVersion
 } = require("@whiskeysockets/baileys")
 const pino = require("pino")
@@ -10,8 +9,6 @@ const { Boom } = require("@hapi/boom")
 const fs = require("fs")
 const chalk = require("chalk")
 const readline = require("readline")
-
-const store = makeInMemoryStore({ logger: pino().child({ level: "silent", stream: "store" }) })
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 const question = (text) => new Promise((resolve) => rl.question(text, resolve))
