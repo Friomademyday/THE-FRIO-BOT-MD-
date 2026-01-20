@@ -82,6 +82,59 @@ if (m.key.remoteJid.endsWith('@g.us') && !gdb[from]) {
         await conn.sendMessage(from, { text: `🚫 Links are not allowed here!` })
     }
             }
+
+            const jokes = [
+    "I told my wife she was drawing her eyebrows too high. She looked surprised.",
+    "Parallel lines have so much in common. It’s a shame they’ll never meet.",
+    "My wife told me to stop impersonating a flamingo. I had to put my foot down.",
+    "I failed math so many times at school, I can’t even tell you.",
+    "What’s the best thing about Switzerland? I don’t know, but the flag is a big plus.",
+    "I’m reading a book on anti-gravity. It’s impossible to put down!",
+    "I used to be a baker, but I couldn't make enough dough.",
+    "Why don't skeletons fight each other? They don't have the guts."
+]
+
+const advice = [
+    "Never trust a skinny cook.",
+    "If you’re the smartest person in the room, you’re in the wrong room.",
+    "Always borrow money from a pessimist. They don’t expect it back.",
+    "The early bird might get the worm, but the second mouse gets the cheese.",
+    "If you want to go fast, go alone. If you want to go far, go together.",
+    "Don't worry about what others think. They don't do it very often.",
+    "A clean house is a sign of a wasted life.",
+    "If you think you are too small to make a difference, try sleeping with a mosquito."
+]
+
+const flirts = [
+    "Is your name Wi-Fi? Because I'm really feeling a connection.",
+    "Do you believe in love at first sight, or should I walk by again?",
+    "If you were a triangle, you'd be acute one.",
+    "I’m not a photographer, but I can definitely picture us together.",
+    "Are you a charger? Because I’m dying without you.",
+    "Do you have a bandage? I scraped my knee falling for you.",
+    "Aside from being sexy, what do you do for a living?",
+    "If I could rearrange the alphabet, I’d put 'U' and 'I' together."
+]
+
+const truths = [
+    "What is the most embarrassing thing in your search history?",
+    "Who in this group would you want to be stranded on an island with?",
+    "What’s a secret you’ve never told anyone in this chat?",
+    "Have you ever ghosted someone?",
+    "What’s the most childish thing you still do?",
+    "If you could trade lives with someone for a day, who would it be?",
+    "What is your biggest deal-breaker in a relationship?"
+]
+
+const dares = [
+    "Send a screenshot of your recent call log.",
+    "Record yourself saying 'I am a little teapot' in a high-pitched voice.",
+    "Text your crush and tell them you like them, then show proof.",
+    "Type your name using only your nose.",
+    "Reveal the last thing you searched for on YouTube.",
+    "Describe the person you like without saying their name.",
+    "Send a photo of the inside of your fridge."
+]
             
             const menuText = `__________________________________
          《 𝗧𝗛𝗘 - 𝗙𝗥𝗶𝗢 - 𝗕𝗢𝗧 》
@@ -163,6 +216,30 @@ if (body.startsWith('@menu')) {
                 }, { quoted: m })
 }
 
+            if (body.startsWith('@joke')) {
+                const joke = jokes[Math.floor(Math.random() * jokes.length)]
+                await conn.sendMessage(from, { text: joke }, { quoted: m })
+            }
+
+            if (body.startsWith('@advice')) {
+                const adv = advice[Math.floor(Math.random() * advice.length)]
+                await conn.sendMessage(from, { text: adv }, { quoted: m })
+            }
+
+            if (body.startsWith('@flirt')) {
+                const flirt = flirts[Math.floor(Math.random() * flirts.length)]
+                await conn.sendMessage(from, { text: flirt }, { quoted: m })
+            }
+
+            if (body.startsWith('@truth')) {
+                const truth = truths[Math.floor(Math.random() * truths.length)]
+                await conn.sendMessage(from, { text: `🧐 *Truth:* ${truth}` }, { quoted: m })
+            }
+
+            if (body.startsWith('@dare')) {
+                const dare = dares[Math.floor(Math.random() * dares.length)]
+                await conn.sendMessage(from, { text: `😈 *Dare:* ${dare}` }, { quoted: m })
+            }
             
             if (body.startsWith('@ping')) {
                 await conn.sendMessage(from, { text: 'Pong! 🏓 THE-FRiO-BOT is active.' }, { quoted: m })
