@@ -2,7 +2,9 @@ const {
     default: makeWASocket, 
     useMultiFileAuthState, 
     DisconnectReason, 
-    makeInMemoryStore 
+    makeInMemoryStore,
+    fetchLatestBaileysVersion,
+    jidDecode
 } = require("@whiskeysockets/baileys")
 const pino = require("pino")
 const { Boom } = require("@hapi/boom")
@@ -17,8 +19,10 @@ const question = (text) => new Promise((resolve) => rl.question(text, resolve))
 
 async function startFrioBot() {
     const { state, saveCreds } = await useMultiFileAuthState('FrioSession')
+    const { version } = await fetchLatestBaileysVersion()
     
     const conn = makeWASocket({
+        version,
         logger: pino({ level: "silent" }),
         printQRInTerminal: false,
         auth: state,
@@ -89,6 +93,29 @@ async function startFrioBot() {
                 }
 
                 await conn.sendMessage(from, { image: { url: imgPath }, caption: caption }, { quoted: m })
+            }
+
+            if (body.startsWith('@balance')) {
+                const balance = db[sender].balance
+                await conn.sendMessage(from, { text: `🏦 *Wallet Balance*\n\nUser: @${sender.split('@')[0]}\nBalance: ${balance}`, mentions: [sender] }, { quoted: m })
+            }
+
+            if (body.startsWith('@daily')) {
+                const lastDaily = db[sender].lastDaily
+                const cooldown = 86400000 
+                if (Date.now() - lastDaily < cooldown) {
+                    const remaining = cooldown - (Date.now() - lastDaily)
+                    const hours = Math.floor(remaining / 3600000)
+                    const minutes = Math.floor((remaining % 3600000) / 60000)
+                    return await conn.sendMessage(from, { text: `⏳ You already claimed today. Come back in ${hours}h ${minutes}m.` }, { quoted: m })
+                }
+                
+                if (!isCreator) {
+                    db[sender].balance += 1000
+                }
+                db[sender].lastDaily = Date.now()
+                fs.writeFileSync('./economyData.json', JSON.stringify(db, null, 2))
+                await conn.sendMessage(from, { text: `✅ Daily reward of 1,000 coins claimed!` }, { quoted: m })
             }
 
         } catch (err) {
