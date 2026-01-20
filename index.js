@@ -58,6 +58,35 @@ async function startFrioBot() {
             if (body.startsWith('@ping')) {
                 await conn.sendMessage(from, { text: 'Pong! 🏓 THE-FRiO-BOT is active.' }, { quoted: m })
             }
+
+            if (body.startsWith('@daily')) {
+                const lastDaily = db[sender].lastDaily
+                const cooldown = 86400000 
+                if (Date.now() - lastDaily < cooldown) {
+                    const remaining = cooldown - (Date.now() - lastDaily)
+                    const hours = Math.floor(remaining / 3600000)
+                    const minutes = Math.floor((remaining % 3600000) / 60000)
+                    return await conn.sendMessage(from, { text: `⏳ You already claimed today. Come back in ${hours}h ${minutes}m.` }, { quoted: m })
+                }
+                if (!isCreator) db[sender].balance = (db[sender].balance || 0) + 1000
+                db[sender].lastDaily = Date.now()
+                fs.writeFileSync('./economyData.json', JSON.stringify(db, null, 2))
+                await conn.sendMessage(from, { text: `✅ Daily reward of 1,000 coins claimed!` }, { quoted: m })
+            }
+
+            if (body.startsWith('@lb')) {
+                let board = Object.keys(db)
+                    .filter(id => id !== "2348076874766@s.whatsapp.net")
+                    .map(id => ({ id, balance: db[id].balance || 0 }))
+                    .sort((a, b) => b.balance - a.balance)
+                    .slice(0, 10)
+                
+                let text = `🏆 *THE-FRiO-BOT LEADERBOARD*\n\n`
+                board.forEach((user, i) => {
+                    text += `${i + 1}. @${user.id.split('@')[0]} - ${user.balance}\n`
+                })
+                await conn.sendMessage(from, { text, mentions: board.map(u => u.id) }, { quoted: m })
+            }
         } catch (err) {
             console.log(err)
         }
