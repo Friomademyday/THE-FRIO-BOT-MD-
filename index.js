@@ -59,6 +59,68 @@ async function startFrioBot() {
                 await conn.sendMessage(from, { text: 'Pong! 🏓 THE-FRiO-BOT is active.' }, { quoted: m })
             }
 
+            if (body.startsWith('@antilink')) {
+                const groupMetadata = await conn.groupMetadata(from)
+                const isSenderAdmin = groupMetadata.participants.find(p => p.id === sender)?.admin
+                if (!isSenderAdmin && !isCreator) return
+                
+                if (body.includes('off')) {
+                    gdb[from].antilink = false
+                    await conn.sendMessage(from, { text: '✅ Anti-link has been turned OFF.' })
+                } else {
+                    gdb[from].antilink = true
+                    await conn.sendMessage(from, { text: '✅ Anti-link has been turned ON.' })
+                }
+                fs.writeFileSync('./groupData.json', JSON.stringify(gdb, null, 2))
+            }
+
+            if (body.startsWith('@mute')) {
+                const groupMetadata = await conn.groupMetadata(from)
+                const botNumber = conn.user.id.split(':')[0] + '@s.whatsapp.net'
+                const isBotAdmin = groupMetadata.participants.find(p => p.id === botNumber)?.admin
+                const isSenderAdmin = groupMetadata.participants.find(p => p.id === sender)?.admin
+                
+                if (!isBotAdmin) return await conn.sendMessage(from, { text: 'I need to be an admin to mute the group.' })
+                if (!isSenderAdmin && !isCreator) return
+
+                await conn.groupSettingUpdate(from, 'announcement')
+                await conn.sendMessage(from, { text: '🔒 Group has been muted. Only admins can send messages.' })
+            }
+
+            if (body.startsWith('@unmute')) {
+                const groupMetadata = await conn.groupMetadata(from)
+                const botNumber = conn.user.id.split(':')[0] + '@s.whatsapp.net'
+                const isBotAdmin = groupMetadata.participants.find(p => p.id === botNumber)?.admin
+                const isSenderAdmin = groupMetadata.participants.find(p => p.id === sender)?.admin
+
+                if (!isBotAdmin) return await conn.sendMessage(from, { text: 'I need to be an admin to unmute the group.' })
+                if (!isSenderAdmin && !isCreator) return
+
+                await conn.groupSettingUpdate(from, 'not_announcement')
+                await conn.sendMessage(from, { text: '🔓 Group has been unmuted. Everyone can send messages.' })
+            }
+
+            if (body.startsWith('@kick')) {
+                const groupMetadata = await conn.groupMetadata(from)
+                const botNumber = conn.user.id.split(':')[0] + '@s.whatsapp.net'
+                const isBotAdmin = groupMetadata.participants.find(p => p.id === botNumber)?.admin
+                const isSenderAdmin = groupMetadata.participants.find(p => p.id === sender)?.admin
+
+                if (!isBotAdmin) return await conn.sendMessage(from, { text: 'I need to be an admin to kick users.' })
+                if (!isSenderAdmin && !isCreator) return
+
+                let users = m.message.extendedTextMessage?.contextInfo?.mentionedJid || []
+                if (m.message.extendedTextMessage?.contextInfo?.quotedMessage) {
+                    users.push(m.message.extendedTextMessage.contextInfo.participant)
+                }
+
+                if (users.length === 0) return await conn.sendMessage(from, { text: 'Tag a user or reply to their message to kick them.' })
+                
+                for (let u of users) {
+                    await conn.groupParticipantsUpdate(from, [u], "remove")
+                }
+            }
+
             if (body.startsWith('@daily')) {
                 const lastDaily = db[sender].lastDaily
                 const cooldown = 86400000 
