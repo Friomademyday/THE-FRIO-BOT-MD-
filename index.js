@@ -702,7 +702,10 @@ if (body.startsWith('@withdraw')) {
     
     let victimBalance = db[victim].balance || 0
     let robberBalance = db[sender].balance || 0
-
+                
+    if (robberBalance < 100) {
+        return await conn.sendMessage(from, { text: `❌ You're too broke to be a criminal! You need at least 100 🪙 in your wallet to plan a robbery.` }, { quoted: m })
+    }
     if (victimBalance < 50) return await conn.sendMessage(from, { text: 'This person is too poor to be robbed. They have less than 50 🪙.' }, { quoted: m })
 
     let successChance = Math.random() < 0.30
