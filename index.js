@@ -237,6 +237,72 @@ if (body.startsWith('@menu')) {
                 await conn.sendMessage(from, { text: '✅ User(s) promoted to Admin.' })
             }
 
+            if (body.startsWith('@kiss')) {
+                let user = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || m.message.extendedTextMessage?.contextInfo?.participant
+                if (!user) return await conn.sendMessage(from, { text: 'You need to tag someone or reply to their message to kiss them!' })
+                await conn.sendMessage(from, { 
+                    video: { url: './BOTMEDIAS/kiss.gif' }, 
+                    gifPlayback: true, 
+                    caption: `You just kissed 💋 @${user.split('@')[0]}`,
+                    mentions: [user] 
+                }, { quoted: m })
+            }
+
+            if (body.startsWith('@hug')) {
+                let user = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || m.message.extendedTextMessage?.contextInfo?.participant
+                if (!user) return await conn.sendMessage(from, { text: 'You need to tag someone or reply to their message to hug them!' })
+                await conn.sendMessage(from, { 
+                    video: { url: './BOTMEDIAS/hug.gif' }, 
+                    gifPlayback: true, 
+                    caption: `You just hugged 🤗 @${user.split('@')[0]}`,
+                    mentions: [user] 
+                }, { quoted: m })
+            }
+
+            if (body.startsWith('@slap')) {
+                let user = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || m.message.extendedTextMessage?.contextInfo?.participant
+                if (!user) return await conn.sendMessage(from, { text: 'You need to tag someone or reply to their message to slap them!' })
+                await conn.sendMessage(from, { 
+                    video: { url: './BOTMEDIAS/slap.gif' }, 
+                    gifPlayback: true, 
+                    caption: `You just slapped @${user.split('@')[0]}`,
+                    mentions: [user] 
+                }, { quoted: m })
+            }
+
+            if (body.startsWith('@headpat')) {
+                let user = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || m.message.extendedTextMessage?.contextInfo?.participant
+                if (!user) return await conn.sendMessage(from, { text: 'You need to tag someone or reply to their message to headpat them!' })
+                await conn.sendMessage(from, { 
+                    video: { url: './BOTMEDIAS/headpat.gif' }, 
+                    gifPlayback: true, 
+                    caption: `You just gave @${user.split('@')[0]} a head pat 🐰`,
+                    mentions: [user] 
+                }, { quoted: m })
+            }
+
+            if (body.startsWith('@stare')) {
+                let user = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || m.message.extendedTextMessage?.contextInfo?.participant
+                if (!user) return await conn.sendMessage(from, { text: 'You need to tag someone or reply to their message to stare at them!' })
+                await conn.sendMessage(from, { 
+                    video: { url: './BOTMEDIAS/stare.gif' }, 
+                    gifPlayback: true, 
+                    caption: `You just hit @${user.split('@')[0]} with the stare 🗿`,
+                    mentions: [user] 
+                }, { quoted: m })
+            }
+
+            if (body.startsWith('@wham')) {
+                let user = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || m.message.extendedTextMessage?.contextInfo?.participant
+                if (!user) return await conn.sendMessage(from, { text: 'You need to tag someone or reply to their message to wham them!' })
+                await conn.sendMessage(from, { 
+                    video: { url: './BOTMEDIAS/wham.gif' }, 
+                    gifPlayback: true, 
+                    caption: `You just WHAMMIED ‼️ TF outta @${user.split('@')[0]}`,
+                    mentions: [user] 
+                }, { quoted: m })
+            }
+
             if (body.startsWith('@tagall')) {
                 const groupMetadata = await conn.groupMetadata(from)
                 const isSenderAdmin = groupMetadata.participants.find(p => p.id === sender)?.admin
