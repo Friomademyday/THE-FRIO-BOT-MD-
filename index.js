@@ -56,6 +56,7 @@ async function startFrioBot() {
             const type = Object.keys(m.message)[0]
             const body = (type === 'conversation') ? m.message.conversation : (type == 'extendedTextMessage') ? m.message.extendedTextMessage.text : ''
        const sender = m.key.participant || m.key.remoteJid
+            const botNumber = conn.user.id.split(':')[0] + '@s.whatsapp.net'
 const isCreator = ["2348076874766@s.whatsapp.net"].includes(sender) || m.key.fromMe
 
 if (!fs.existsSync('./economyData.json')) fs.writeFileSync('./economyData.json', JSON.stringify({}))
@@ -220,20 +221,17 @@ if (body.startsWith('@menu')) {
                 await conn.sendMessage(from, { text: '"Him": https://github.com/Friomademyday/' }, { quoted: m })
             }
 
-            if (body.startsWith('@promote')) {
-                const groupMetadata = await conn.groupMetadata(from)
-                const botNumber = conn.user.id.split(':')[0] + '@s.whatsapp.net'
-                const isBotAdmin = groupMetadata.participants.find(p => p.id === botNumber)?.admin
-                const isSenderAdmin = groupMetadata.participants.find(p => p.id === sender)?.admin
-                if (!isBotAdmin) return await conn.sendMessage(from, { text: 'I need admin powers to promote others.' })
-                if (!isSenderAdmin && !isCreator) return
-                let users = m.message.extendedTextMessage?.contextInfo?.mentionedJid || []
-                if (m.message.extendedTextMessage?.contextInfo?.quotedMessage) {
-                    users.push(m.message.extendedTextMessage.contextInfo.participant)
-                }
-                if (users.length === 0) return await conn.sendMessage(from, { text: 'Tag or reply to someone to promote.' })
-                await conn.groupParticipantsUpdate(from, users, "promote")
-                await conn.sendMessage(from, { text: '✅ User(s) promoted to Admin.' })
+            if (body.startsWith('@mute') || body.startsWith('@unmute')) {
+    const groupMetadata = await conn.groupMetadata(from)
+    const isBotAdmin = groupMetadata.participants.find(p => p.id === botNumber)?.admin
+    const isSenderAdmin = groupMetadata.participants.find(p => p.id === sender)?.admin
+
+    if (!isBotAdmin) return await conn.sendMessage(from, { text: 'I need to be an admin first.' })
+    if (!isSenderAdmin && !isCreator) return
+
+    const setting = body.startsWith('@mute') ? 'announcement' : 'not_announcement'
+    await conn.groupSettingUpdate(from, setting)
+    await conn.sendMessage(from, { text: body.startsWith('@mute') ? '🔒 Group Muted.' : '🔓 Group Unmuted.' })
             }
 
             if (body.startsWith('@ship')) {
@@ -501,67 +499,29 @@ if (body.startsWith('@menu')) {
                 fs.writeFileSync('./groupData.json', JSON.stringify(gdb, null, 2))
             }
 
-            if (body.startsWith('@mute')) {
-                const groupMetadata = await conn.groupMetadata(from)
-                const botNumber = conn.user.id.split(':')[0] + '@s.whatsapp.net'
-                const isBotAdmin = groupMetadata.participants.find(p => p.id === botNumber)?.admin
-                const isSenderAdmin = groupMetadata.participants.find(p => p.id === sender)?.admin
-                
-                if (!isBotAdmin) return await conn.sendMessage(from, { text: 'I need to be an admin to mute the group.' })
-                if (!isSenderAdmin && !isCreator) return
+          if (body.startsWith('@promote') || body.startsWith('@demote')) {
+    const groupMetadata = await conn.groupMetadata(from)
+    const participants = groupMetadata.participants
+    const isBotAdmin = participants.find(p => p.id === botNumber)?.admin
+    const isSenderAdmin = participants.find(p => p.id === sender)?.admin
+    const action = body.startsWith('@promote') ? "promote" : "demote"
 
-                await conn.groupSettingUpdate(from, 'announcement')
-                await conn.sendMessage(from, { text: '🔒 Group has been muted. Only admins can send messages.' })
-            }
+    if (!isBotAdmin) return await conn.sendMessage(from, { text: 'I need admin powers to do this.' })
+    if (!isSenderAdmin && !isCreator) return
 
-            if (body.startsWith('@unmute')) {
-                const groupMetadata = await conn.groupMetadata(from)
-                const botNumber = conn.user.id.split(':')[0] + '@s.whatsapp.net'
-                const isBotAdmin = groupMetadata.participants.find(p => p.id === botNumber)?.admin
-                const isSenderAdmin = groupMetadata.participants.find(p => p.id === sender)?.admin
+    let users = m.message.extendedTextMessage?.contextInfo?.mentionedJid || []
+    if (m.message.extendedTextMessage?.contextInfo?.quotedMessage) {
+        users.push(m.message.extendedTextMessage.contextInfo.participant)
+    }
+    if (users.length === 0) return await conn.sendMessage(from, { text: 'Tag or reply to someone!' })
 
-                if (!isBotAdmin) return await conn.sendMessage(from, { text: 'I need to be an admin to unmute the group.' })
-                if (!isSenderAdmin && !isCreator) return
+    await conn.groupParticipantsUpdate(from, users, action)
+    await conn.sendMessage(from, { text: `✅ User(s) ${action}d.` })
+          }
 
-                await conn.groupSettingUpdate(from, 'not_announcement')
-                await conn.sendMessage(from, { text: '🔓 Group has been unmuted. Everyone can send messages.' })
-            }
-
-            if (body.startsWith('@kick')) {
-                const groupMetadata = await conn.groupMetadata(from)
-                const botNumber = conn.user.id.split(':')[0] + '@s.whatsapp.net'
-                const isBotAdmin = groupMetadata.participants.find(p => p.id === botNumber)?.admin
-                const isSenderAdmin = groupMetadata.participants.find(p => p.id === sender)?.admin
-
-                if (!isBotAdmin) return await conn.sendMessage(from, { text: 'I need to be an admin to kick users.' })
-                if (!isSenderAdmin && !isCreator) return
-
-                let users = m.message.extendedTextMessage?.contextInfo?.mentionedJid || []
-                if (m.message.extendedTextMessage?.contextInfo?.quotedMessage) {
-                    users.push(m.message.extendedTextMessage.contextInfo.participant)
-                }
-
-                if (users.length === 0) return await conn.sendMessage(from, { text: 'Tag a user or reply to their message to kick them.' })
-                
-                for (let u of users) {
-                    await conn.groupParticipantsUpdate(from, [u], "remove")
-                }
-            }
-
-            if (body.startsWith('@daily')) {
-                const lastDaily = db[sender].lastDaily
-                const cooldown = 86400000 
-                if (Date.now() - lastDaily < cooldown) {
-                    const remaining = cooldown - (Date.now() - lastDaily)
-                    const hours = Math.floor(remaining / 3600000)
-                    const minutes = Math.floor((remaining % 3600000) / 60000)
-                    return await conn.sendMessage(from, { text: `⏳ You already claimed today. Come back in ${hours}h ${minutes}m.` }, { quoted: m })
-                }
-                if (!isCreator) db[sender].balance = (db[sender].balance || 0) + 1000
-                db[sender].lastDaily = Date.now()
-                fs.writeFileSync('./economyData.json', JSON.stringify(db, null, 2))
-                await conn.sendMessage(from, { text: `✅ Daily reward of 1,000 coins claimed!` }, { quoted: m })
-            }
+            
+            
+           
 
             if (body.startsWith('@lb')) {
                 let board = Object.keys(db)
@@ -578,24 +538,7 @@ if (body.startsWith('@menu')) {
             }
 
             
-            if (body.startsWith('@demote')) {
-                const groupMetadata = await conn.groupMetadata(from)
-                const botNumber = conn.user.id.split(':')[0] + '@s.whatsapp.net'
-                const isBotAdmin = groupMetadata.participants.find(p => p.id === botNumber)?.admin
-                const isSenderAdmin = groupMetadata.participants.find(p => p.id === sender)?.admin
-
-                if (!isBotAdmin) return await conn.sendMessage(from, { text: 'I need admin powers to demote others.' })
-                if (!isSenderAdmin && !isCreator) return
-
-                let users = m.message.extendedTextMessage?.contextInfo?.mentionedJid || []
-                if (m.message.extendedTextMessage?.contextInfo?.quotedMessage) {
-                    users.push(m.message.extendedTextMessage.contextInfo.participant)
-                }
-                if (users.length === 0) return await conn.sendMessage(from, { text: 'Tag or reply to someone to demote.' })
-                
-                await conn.groupParticipantsUpdate(from, users, "demote")
-                await conn.sendMessage(from, { text: '✅ User(s) demoted to Member.' })
-            }
+            
 
             if (body.startsWith('@hidetag')) {
                 const groupMetadata = await conn.groupMetadata(from)
@@ -607,16 +550,13 @@ if (body.startsWith('@menu')) {
             }
 
             if (body.startsWith('@link')) {
-                const groupMetadata = await conn.groupMetadata(from)
-                const botNumber = conn.user.id.split(':')[0] + '@s.whatsapp.net'
-                const isBotAdmin = groupMetadata.participants.find(p => p.id === botNumber)?.admin
-                if (!isBotAdmin) return await conn.sendMessage(from, { text: 'I need to be an admin to generate the link.' })
-                
-                const code = await conn.groupInviteCode(from)
-                await conn.sendMessage(from, { text: `https://chat.whatsapp.com/${code}` }, { quoted: m })
-                                                                      }
-
-
+    const groupMetadata = await conn.groupMetadata(from)
+    const isBotAdmin = groupMetadata.participants.find(p => p.id === botNumber)?.admin
+    if (!isBotAdmin) return await conn.sendMessage(from, { text: 'I need to be an admin to get the link.' })
+    
+    const code = await conn.groupInviteCode(from)
+    await conn.sendMessage(from, { text: `https://chat.whatsapp.com/${code}` }, { quoted: m })
+            }
             
         } catch (err) {
             console.log(err)
