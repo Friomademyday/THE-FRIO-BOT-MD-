@@ -194,15 +194,9 @@ const dares = [
 ➪ ➪ ➪ 𝑴 𝑬 𝑵 𝑼 ➪ ➪ ➪
 
 ➪ ‎𝗚𝗥𝗢𝗨𝗣 𝗔𝗗𝗠𝗜𝗡𝗜𝗦𝗧𝗥𝗔𝗧𝗜𝗢𝗡 
-‎*@ᴘʀᴏᴍᴏᴛᴇ*
-‎*@ᴅᴇᴍᴏᴛᴇ*
-‎*@ᴍᴜᴛᴇ* 
-‎*@ᴜɴᴍᴜᴛᴇ* 
-‎*@ᴋɪᴄᴋ*
 ‎*@ᴀɴᴛɪʟɪɴᴋ ᴏɴ/ᴏғғ*
 ‎*@ʜɪᴅᴇᴛᴀɢ*
 ‎*@ᴛᴀɢᴀʟʟ*
-‎*@ʟɪɴᴋ* 
 ‎
 ➪ ‎𝗘𝗖𝗢𝗡𝗢𝗠𝗬 𝗦𝗬𝗦𝗧𝗘𝗠𝗦 
 ‎*@ᴅᴀɪʟʏ*
@@ -233,8 +227,6 @@ const dares = [
 *@ᴛʀᴜᴛʜ* 
 
 ➪ ‎𝗠𝗘𝗗𝗜𝗔 𝗔𝗡𝗗 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗦 ➪
-‎*@sᴛɪᴄᴋᴇʀ* 
-‎*@ᴛᴏɪᴍɢ*
 *@ᴛᴛᴀ*
 ‎
 ➪ ‎𝗦𝗬𝗦𝗧𝗘𝗠 𝗔𝗡𝗗 𝗜𝗡𝗙𝗢 
@@ -459,36 +451,7 @@ if (body.startsWith('@jackpot')) {
                 await conn.sendMessage(from, { text: '📦 *THE-FRiO-BOT REPO:*\n\nhttps://github.com/Friomademyday/THE-FRIO-BOT-MD-/' }, { quoted: m })
             }
 
-            if (body.startsWith('@sticker') || body.startsWith('@s')) {
-                const isQuotedImage = type === 'extendedTextMessage' && m.message.extendedTextMessage.contextInfo.quotedMessage?.imageMessage
-                const isQuotedVideo = type === 'extendedTextMessage' && m.message.extendedTextMessage.contextInfo.quotedMessage?.videoMessage
-                
-                let buffer
-                if (type === 'imageMessage' || isQuotedImage) {
-                    const message = isQuotedImage ? m.message.extendedTextMessage.contextInfo.quotedMessage.imageMessage : m.message.imageMessage
-                    const stream = await downloadContentFromMessage(message, 'image')
-                    let b = Buffer.from([])
-                    for await(const chunk of stream) { b = Buffer.concat([b, chunk]) }
-                    buffer = b
-                } else if (type === 'videoMessage' || isQuotedVideo) {
-                    const message = isQuotedVideo ? m.message.extendedTextMessage.contextInfo.quotedMessage.videoMessage : m.message.videoMessage
-                    if (message.seconds > 10) return await conn.sendMessage(from, { text: 'Video too long!' })
-                    const stream = await downloadContentFromMessage(message, 'video')
-                    let b = Buffer.from([])
-                    for await(const chunk of stream) { b = Buffer.concat([b, chunk]) }
-                    buffer = b
-                }
-
-                if (buffer) {
-                    await conn.sendMessage(from, { 
-                        sticker: buffer, 
-                        packname: 'THE-FRiO-BOT', 
-                        author: 'FRiO' 
-                    }, { quoted: m })
-                } else {
-                    await conn.sendMessage(from, { text: 'Reply to an image or video!' })
-                }
-            }
+            
 
             if (body.startsWith('@joke')) {
                 const joke = jokes[Math.floor(Math.random() * jokes.length)]
@@ -497,14 +460,7 @@ if (body.startsWith('@jackpot')) {
 
             
 
-            if (body.startsWith('@toimg')) {
-                const isQuotedSticker = type === 'extendedTextMessage' && m.message.extendedTextMessage.contextInfo.quotedMessage?.stickerMessage
-                if (!isQuotedSticker) return await conn.sendMessage(from, { text: 'Reply to a non-animated sticker to convert it to an image.' })
-                const stream = await downloadContentFromMessage(m.message.extendedTextMessage.contextInfo.quotedMessage.stickerMessage, 'image')
-                let buffer = Buffer.from([])
-                for await(const chunk of stream) { buffer = Buffer.concat([buffer, chunk]) }
-                await conn.sendMessage(from, { image: buffer, caption: 'Done! ✨' }, { quoted: m })
-                    }
+            
 
             
 
@@ -563,27 +519,7 @@ if (body.startsWith('@antilinkoff')) {
     await conn.sendMessage(from, { text: '❌ Anti-Link is now DISABLED.' })
 }
 
-          if (body.startsWith('@promote')) {
-    if (!isBotAdmin) return await conn.sendMessage(from, { text: '❌ I need to be an admin to promote people!' }, { quoted: m })
-    if (!isAdmins && !isCreator) return await conn.sendMessage(from, { text: '❌ Only admins can use this command!' }, { quoted: m })
-
-    let user = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0]
-    if (!user) return await conn.sendMessage(from, { text: 'Tag the person you want to promote!' }, { quoted: m })
-
-    await conn.groupParticipantsUpdate(from, [user], "promote")
-    await conn.sendMessage(from, { text: `✅ @${user.split('@')[0]} is now an Admin!`, mentions: [user] })
-}
-
-if (body.startsWith('@demote')) {
-    if (!isBotAdmin) return await conn.sendMessage(from, { text: '❌ I need to be an admin to demote people!' }, { quoted: m })
-    if (!isAdmins && !isCreator) return await conn.sendMessage(from, { text: '❌ Only admins can use this command!' }, { quoted: m })
-
-    let user = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0]
-    if (!user) return await conn.sendMessage(from, { text: 'Tag the person you want to demote!' }, { quoted: m })
-
-    await conn.groupParticipantsUpdate(from, [user], "demote")
-    await conn.sendMessage(from, { text: `❌ @${user.split('@')[0]} has been demoted to Member.`, mentions: [user] })
-}
+          
 
             if (body.startsWith('@daily')) {
     const today = new Date().toISOString().split('T')[0]
@@ -902,34 +838,7 @@ Wallet: ${db[userId].balance.toLocaleString()} 🪙`
     }, { quoted: m })
             }
 
-            if (body.startsWith('@kick')) {
-    if (!isBotAdmin) return await conn.sendMessage(from, { text: '❌ I need to be an admin to kick people!' }, { quoted: m })
-    if (!isAdmins && !isCreator) return await conn.sendMessage(from, { text: '❌ Only admins can use this command!' }, { quoted: m })
-
-    let victim = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0]
-    if (!victim) return await conn.sendMessage(from, { text: 'Tag the person you want to kick!' }, { quoted: m })
-
-    await conn.groupParticipantsUpdate(from, [victim], "remove")
-    await conn.sendMessage(from, { text: `👢 @${victim.split('@')[0]} has been kicked from the group.`, mentions: [victim] })
-            }
             
-            if (body.startsWith('@hidetag')) {
-                const groupMetadata = await conn.groupMetadata(from)
-                const isSenderAdmin = groupMetadata.participants.find(p => p.id === sender)?.admin
-                if (!isSenderAdmin && !isCreator) return
-
-                let participants = groupMetadata.participants
-                await conn.sendMessage(from, { text: body.slice(9) || 'Hello everyone!', mentions: participants.map(a => a.id) })
-            }
-
-            if (body.startsWith('@link')) {
-    const groupMetadata = await conn.groupMetadata(from)
-    const isBotAdmin = groupMetadata.participants.find(p => p.id === botNumber)?.admin
-    if (!isBotAdmin) return await conn.sendMessage(from, { text: 'I need to be an admin to get the link.' })
-    
-    const code = await conn.groupInviteCode(from)
-    await conn.sendMessage(from, { text: `https://chat.whatsapp.com/${code}` }, { quoted: m })
-            }
             
         } catch (err) {
             console.log(err)
