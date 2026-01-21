@@ -816,8 +816,43 @@ Wallet: ${db[userId].balance.toLocaleString()} 🪙`
             }
 
             
-            
+            if (body.startsWith('@profile')) {
+    let user = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || m.message.extendedTextMessage?.contextInfo?.participant || sender
+    
+    if (!db[user]) {
+        db[user] = { balance: 1000, bank: 0, lastClaim: '', lastClaimExtra: '', msccount: 0, rank: 'NOOB', bonusesClaimed: [] }
+        fs.writeFileSync('./economyData.json', JSON.stringify(db, null, 2))
+    }
 
+    const userStats = db[user]
+    const pushname = m.pushName || "User"
+    
+    let profileMsg = `👤 *USER PROFILE* 👤\n\n`
+    profileMsg += `📝 *Name:* ${pushname}\n`
+    profileMsg += `🏅 *Rank:* ${userStats.rank}\n`
+    profileMsg += `💬 *Messages:* ${userStats.msccount || 0}\n`
+    profileMsg += `━━━━━━━━━━━━━━━\n`
+    profileMsg += `💰 *Wallet:* ${userStats.balance.toLocaleString()} 🪙\n`
+    profileMsg += `🏦 *Bank:* ${userStats.bank.toLocaleString()} 🪙\n`
+    profileMsg += `💳 *Total:* ${(userStats.balance + userStats.bank).toLocaleString()} 🪙\n`
+    profileMsg += `━━━━━━━━━━━━━━━\n`
+    profileMsg += `📅 *Joined:* 2026\n`
+
+    let ppUrl
+    try {
+        ppUrl = await conn.profilePictureUrl(user, 'image')
+    } catch {
+        ppUrl = 'https://i.ibb.co/4pDNDk1/avatar.png' 
+    }
+
+    await conn.sendMessage(from, { 
+        image: { url: ppUrl }, 
+        caption: profileMsg,
+        mentions: [user]
+    }, { quoted: m })
+            }
+
+            
             if (body.startsWith('@hidetag')) {
                 const groupMetadata = await conn.groupMetadata(from)
                 const isSenderAdmin = groupMetadata.participants.find(p => p.id === sender)?.admin
