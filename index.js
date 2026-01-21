@@ -305,6 +305,23 @@ if (body.startsWith('@menu')) {
                 }, { quoted: m })
             }
 
+            if (body.startsWith('@buypool')) {
+    if (!from.endsWith('@g.us')) return await conn.sendMessage(from, { text: 'This command can only be used in groups!' })
+    if (db[sender].balance < 75000) return await conn.sendMessage(from, { text: '❌ You need 75,000 🪙 to enter the pool!' }, { quoted: m })
+    
+    if (!gdb[from].pool) gdb[from].pool = []
+    if (gdb[from].pool.includes(sender)) return await conn.sendMessage(from, { text: '❌ You are already in the pool!' }, { quoted: m })
+
+    db[sender].balance -= 75000
+    gdb[from].jackpot = (gdb[from].jackpot || 0) + 75000
+    gdb[from].pool.push(sender)
+    
+    fs.writeFileSync('./economyData.json', JSON.stringify(db, null, 2))
+    fs.writeFileSync('./groupData.json', JSON.stringify(gdb, null, 2))
+    
+    await conn.sendMessage(from, { text: `✅ Entry Confirmed!\n\n💰 *Group Jackpot:* ${gdb[from].jackpot.toLocaleString()} 🪙` }, { quoted: m })
+            }
+
             if (body.startsWith('@marry')) {
                 let user = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || m.message.extendedTextMessage?.contextInfo?.participant
                 if (!user) return await conn.sendMessage(from, { text: 'You need to tag someone or reply to their message to marry them!' })
@@ -418,7 +435,21 @@ if (body.startsWith('@menu')) {
 
 if (body.startsWith('@jackpot')) {
     const currentJackpot = gdb[from]?.jackpot || 0
-    await conn.sendMessage(from, { text: `🎰 *GROUP JACKPOT* 🎰\n\nThe current pool for this group is: *${currentJackpot.toLocaleString()} 🪙*\n\nLose in @gamble to increase it, or wait for the chance to win it all!` }, { quoted: m })
+    const poolCount = gdb[from]?.pool?.length || 0
+    
+    let statusMsg = `🎰 *GROUP JACKPOT* 🎰\n\n`
+    statusMsg += `💰 *Current Pool:* ${currentJackpot.toLocaleString()} 🪙\n`
+    statusMsg += `👥 *Pool Members:* ${poolCount}\n\n`
+    
+    if (poolCount > 0) {
+        statusMsg += `🔥 *STATUS:* A pool is currently ACTIVE! The draw happens every 48 hours.\n\n`
+        statusMsg += `👉 Type *@buypool* to join for 75,000 🪙!`
+    } else {
+        statusMsg += `💤 *STATUS:* No active pool members yet.\n\n`
+        statusMsg += `👉 Be the first to start the pool! Type *@buypool* to join for 75,000 🪙.`
+    }
+
+    await conn.sendMessage(from, { text: statusMsg }, { quoted: m })
 }
             
             if (body.startsWith('@tagall')) {
@@ -833,5 +864,44 @@ Wallet: ${db[userId].balance.toLocaleString()} 🪙`
         }
     })
 }
+
+setInterval(async () => {
+    let gdb = JSON.parse(fs.readFileSync('./groupData.json'))
+    let db = JSON.parse(fs.readFileSync('./economyData.json'))
+    const now = Date.now()
+
+    for (let groupId in gdb) {
+        if (gdb[groupId].pool && gdb[groupId].pool.length > 0) {
+            if (!gdb[groupId].lastDraw) {
+                gdb[groupId].lastDraw = now
+                fs.writeFileSync('./groupData.json', JSON.stringify(gdb, null, 2))
+                continue
+            }
+
+            if (now - gdb[groupId].lastDraw >= 172800000) {
+                let pool = gdb[groupId].pool
+                let winner = pool[Math.floor(Math.random() * pool.length)]
+                let prize = gdb[groupId].jackpot
+
+                db[winner].balance = (db[winner].balance || 0) + prize
+                
+                let winMsg = `🎊 *JACKPOT WINNER!* 🎊\n\n@${winner.split('@')[0]} just collected the group jackpot worth *${prize.toLocaleString()} 🪙*!!\n\nCongratulations! The pool has been reset.`
+
+                await conn.sendMessage(groupId, { 
+                    image: fs.readFileSync('./BOTMEDIAS/jackpot.jpg'),
+                    caption: winMsg,
+                    mentions: [winner]
+                })
+
+                gdb[groupId].jackpot = 0
+                gdb[groupId].pool = []
+                gdb[groupId].lastDraw = now
+                
+                fs.writeFileSync('./groupData.json', JSON.stringify(gdb, null, 2))
+                fs.writeFileSync('./economyData.json', JSON.stringify(db, null, 2))
+            }
+        }
+    }
+}, 3600000)
 
 startFrioBot()
