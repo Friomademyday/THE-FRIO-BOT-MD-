@@ -349,6 +349,53 @@ if (body.startsWith('@menu')) {
                 }, { quoted: m })
             }
 
+
+            if (body.startsWith('@gamble')) {
+    const args = body.split(' ')
+    const gambleAmount = parseInt(args[1])
+    const userId = sender
+    let currentBalance = db[userId].balance || 0
+
+    if (isNaN(gambleAmount) || gambleAmount <= 0) {
+        return await conn.sendMessage(from, { text: "Please specify a valid amount to gamble." }, { quoted: m })
+    }
+
+    if (gambleAmount > currentBalance) {
+        return await conn.sendMessage(from, { text: `You don't have enough coins! Your balance is ${currentBalance}.` }, { quoted: m })
+    }
+
+    const gambleResult = Math.random() < 0.5 ? "win" : "lose"
+    
+    if (gambleResult === "win") {
+        const oldAmount = currentBalance
+        db[userId].balance += gambleAmount
+        const newAmount = db[userId].balance
+        
+        await conn.sendMessage(from, { 
+            image: fs.readFileSync('./BOTMEDIAS/win.jpg'),
+            caption: `*KAKEGURUI!! ✅✅✅*\nyou just flipped ${oldAmount.toLocaleString()} 🪙 coins to ${newAmount.toLocaleString()} 🪙 coins`
+        }, { quoted: m })
+    } else {
+        db[userId].balance -= gambleAmount
+        
+        if (!gdb[from]) gdb[from] = { antilink: false, jackpot: 0 }
+        gdb[from].jackpot = (gdb[from].jackpot || 0) + gambleAmount
+        
+        await conn.sendMessage(from, { 
+            image: fs.readFileSync('./BOTMEDIAS/lose.jpg'),
+            caption: `*KAKEGURUI!!! ❌❌❌*\nLmao you ain't Yumeko Jabami twin 😭💔, you just lost ${gambleAmount.toLocaleString()}, all your losses have been moved to the general *JACKPOT*`
+        }, { quoted: m })
+    }
+    
+    fs.writeFileSync('./economyData.json', JSON.stringify(db, null, 2))
+    fs.writeFileSync('./groupData.json', JSON.stringify(gdb, null, 2))
+}
+
+if (body.startsWith('@jackpot')) {
+    const currentJackpot = gdb[from]?.jackpot || 0
+    await conn.sendMessage(from, { text: `🎰 *GROUP JACKPOT* 🎰\n\nThe current pool for this group is: *${currentJackpot.toLocaleString()} 🪙*\n\nLose in @gamble to increase it, or wait for the chance to win it all!` }, { quoted: m })
+}
+            
             if (body.startsWith('@tagall')) {
                 const groupMetadata = await conn.groupMetadata(from)
                 const isSenderAdmin = groupMetadata.participants.find(p => p.id === sender)?.admin
