@@ -315,6 +315,7 @@ if (body.startsWith('@menu')) {
     db[sender].balance -= 75000
     gdb[from].jackpot = (gdb[from].jackpot || 0) + 75000
     gdb[from].pool.push(sender)
+                if (!gdb[from].lastDraw) gdb[from].lastDraw = Date.now()
     
     fs.writeFileSync('./economyData.json', JSON.stringify(db, null, 2))
     fs.writeFileSync('./groupData.json', JSON.stringify(gdb, null, 2))
@@ -866,32 +867,33 @@ Wallet: ${db[userId].balance.toLocaleString()} 🪙`
 }
 
 setInterval(async () => {
+    if (!fs.existsSync('./groupData.json') || !fs.existsSync('./economyData.json')) return
     let gdb = JSON.parse(fs.readFileSync('./groupData.json'))
     let db = JSON.parse(fs.readFileSync('./economyData.json'))
     const now = Date.now()
 
     for (let groupId in gdb) {
         if (gdb[groupId].pool && gdb[groupId].pool.length > 0) {
-            if (!gdb[groupId].lastDraw) {
-                gdb[groupId].lastDraw = now
-                fs.writeFileSync('./groupData.json', JSON.stringify(gdb, null, 2))
-                continue
-            }
+            if (!gdb[groupId].lastDraw) continue 
 
             if (now - gdb[groupId].lastDraw >= 172800000) {
                 let pool = gdb[groupId].pool
                 let winner = pool[Math.floor(Math.random() * pool.length)]
                 let prize = gdb[groupId].jackpot
 
-                db[winner].balance = (db[winner].balance || 0) + prize
+                if (!db[winner]) db[winner] = { balance: 0, bank: 0, lastClaim: '', lastClaimExtra: '', msccount: 0, rank: 'NOOB', bonusesClaimed: [] }
+                
+                db[winner].balance += prize
                 
                 let winMsg = `🎊 *JACKPOT WINNER!* 🎊\n\n@${winner.split('@')[0]} just collected the group jackpot worth *${prize.toLocaleString()} 🪙*!!\n\nCongratulations! The pool has been reset.`
 
-                await conn.sendMessage(groupId, { 
-                    image: fs.readFileSync('./BOTMEDIAS/jackpot.jpg'),
-                    caption: winMsg,
-                    mentions: [winner]
-                })
+                try {
+                    await conn.sendMessage(groupId, { 
+                        image: fs.readFileSync('./BOTMEDIAS/jackpot.jpg'),
+                        caption: winMsg,
+                        mentions: [winner]
+                    })
+                } catch (e) { console.log("Failed to send jackpot message") }
 
                 gdb[groupId].jackpot = 0
                 gdb[groupId].pool = []
