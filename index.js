@@ -60,21 +60,35 @@ async function startFrioBot() {
 const isCreator = ["2348076874766@s.whatsapp.net"].includes(sender) || m.key.fromMe
 
 if (!fs.existsSync('./economyData.json')) fs.writeFileSync('./economyData.json', JSON.stringify({}))
+if (!fs.existsSync('./groupData.json')) fs.writeFileSync('./groupData.json', JSON.stringify({}))
+
 let db = JSON.parse(fs.readFileSync('./economyData.json'))
-            if (!fs.existsSync('./groupData.json')) fs.writeFileSync('./groupData.json', JSON.stringify({}))
 let gdb = JSON.parse(fs.readFileSync('./groupData.json'))
 
-if (m.key.remoteJid.endsWith('@g.us') && !gdb[from]) {
+if (!db[sender]) {
+    db[sender] = { 
+        balance: 1000, 
+        bank: 0, 
+        lastClaim: '', 
+        lastClaimExtra: '', 
+        msccount: 0, 
+        rank: 'NOOB', 
+        bonusesClaimed: [] 
+    }
+    fs.writeFileSync('./economyData.json', JSON.stringify(db, null, 2))
+}
+
+if (from.endsWith('@g.us') && !gdb[from]) {
     gdb[from] = {
         antilink: false,
-        mute: false
+        mute: false,
+        jackpot: 0
     }
     fs.writeFileSync('./groupData.json', JSON.stringify(gdb, null, 2))
 }
 
-            if (m.key.remoteJid.endsWith('@g.us') && gdb[from] && gdb[from].antilink && body.includes('chat.whatsapp.com')) {
+if (from.endsWith('@g.us') && gdb[from] && gdb[from].antilink && body.includes('chat.whatsapp.com')) {
     const groupMetadata = await conn.groupMetadata(from)
-    const botNumber = conn.user.id.split(':')[0] + '@s.whatsapp.net'
     const isBotAdmin = groupMetadata.participants.find(p => p.id === botNumber)?.admin
     const isSenderAdmin = groupMetadata.participants.find(p => p.id === sender)?.admin
 
@@ -82,9 +96,7 @@ if (m.key.remoteJid.endsWith('@g.us') && !gdb[from]) {
         await conn.sendMessage(from, { delete: m.key })
         await conn.sendMessage(from, { text: `🚫 Links are not allowed here!` })
     }
-
-                if (!db[sender]) db[sender] = { balance: 0, lastDaily: 0 }
-            }
+}
 
             const jokes = [
     "I told my wife she was drawing her eyebrows too high. She looked surprised.",
