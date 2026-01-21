@@ -78,6 +78,9 @@ if (!db[sender]) {
     fs.writeFileSync('./economyData.json', JSON.stringify(db, null, 2))
 }
 
+       db[sender].msccount += 1
+fs.writeFileSync('./economyData.json', JSON.stringify(db, null, 2))
+            
 if (from.endsWith('@g.us') && !gdb[from]) {
     gdb[from] = {
         antilink: false,
