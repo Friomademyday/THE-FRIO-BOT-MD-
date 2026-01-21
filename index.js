@@ -80,6 +80,34 @@ if (!db[sender]) {
 
        db[sender].msccount += 1
 fs.writeFileSync('./economyData.json', JSON.stringify(db, null, 2))
+
+      let count = db[sender].msccount
+let newRank = ''
+let rankImage = ''
+
+if (count === 100) {
+    newRank = 'ELITE'
+    rankImage = './BOTMEDIAS/rankelite.jpg'
+} else if (count === 300) {
+    newRank = 'GRANDMASTER'
+    rankImage = './BOTMEDIAS/rankgrandmaster.jpg'
+} else if (count === 2000) {
+    newRank = 'GODLIKE'
+    rankImage = './BOTMEDIAS/rankgodlike.jpg'
+}
+
+if (newRank !== '') {
+    db[sender].rank = newRank
+    fs.writeFileSync('./economyData.json', JSON.stringify(db, null, 2))
+    
+    let caption = `🎊 *CONGRATULATIONS!* 🎊\n\n@${sender.split('@')[0]}, you've just reached the **${newRank}** rank!\n\nThis was achieved by sending *${count}* messages across all groups. Keep pushing, legend! 🚀`
+    
+    await conn.sendMessage(from, { 
+        image: fs.readFileSync(rankImage), 
+        caption: caption, 
+        mentions: [sender] 
+    })
+}
             
 if (from.endsWith('@g.us') && !gdb[from]) {
     gdb[from] = {
@@ -823,6 +851,45 @@ Wallet: ${db[userId].balance.toLocaleString()} 🪙`
     }, { quoted: m })
             }
 
+            if (body.startsWith('@rank')) {
+    let count = db[sender].msccount || 0
+    let currentRank = db[sender].rank || 'NOOB'
+    let rankImage = './BOTMEDIAS/ranknoob.jpg'
+    
+    if (count >= 2000) {
+        rankImage = './BOTMEDIAS/rankgodlike.jpg'
+    } else if (count >= 300) {
+        rankImage = './BOTMEDIAS/rankgrandmaster.jpg'
+    } else if (count >= 100) {
+        rankImage = './BOTMEDIAS/rankelite.jpg'
+    }
+
+    let nextRank = ''
+    let req = 0
+    if (count < 100) { nextRank = 'ELITE'; req = 100 }
+    else if (count < 300) { nextRank = 'GRANDMASTER'; req = 300 }
+    else if (count < 2000) { nextRank = 'GODLIKE'; req = 2000 }
+
+    let progress = req > 0 ? (count / req) * 100 : 100
+    
+    let text = `🏅 *GLOBAL RANK DETAILS* 🏅\n\n`
+    text += `👤 *User:* @${sender.split('@')[0]}\n`
+    text += `⭐ *Rank:* ${currentRank}\n`
+    text += `💬 *Total Messages:* ${count.toLocaleString()}\n`
+    text += `📈 *Progress:* ${progress.toFixed(1)}%\n\n`
+    
+    if (req > 0) {
+        text += `🚀 *Next Goal:* ${nextRank} at ${req} messages!`
+    } else {
+        text += `👑 *Peak Status:* Holy unemployment someone get this unc a job!`
+    }
+
+    await conn.sendMessage(from, { 
+        image: fs.readFileSync(rankImage), 
+        caption: text, 
+        mentions: [sender] 
+    }, { quoted: m })
+            }
             
             if (body.startsWith('@hidetag')) {
                 const groupMetadata = await conn.groupMetadata(from)
