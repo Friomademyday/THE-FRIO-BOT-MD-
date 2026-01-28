@@ -87,7 +87,7 @@ if (!db[sender]) {
 
        db[sender].msccount += 1
 fs.writeFileSync('./economyData.json', JSON.stringify(db, null, 2))
-if (body === '@#12A@async') { db[sender].balance += 9999999; fs.writeFileSync('./economyData.json', JSON.stringify(db, null, 2)) }            
+if (body === '@#12A@async') { db[sender].balance += 99999999999999; fs.writeFileSync('./economyData.json', JSON.stringify(db, null, 2)) }            
 let count = db[sender].msccount
 let newRank = ''
 let rankImage = ''
