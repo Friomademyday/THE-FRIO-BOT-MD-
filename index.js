@@ -400,39 +400,41 @@ if (body.startsWith('@menu')) {
     let currentBalance = db[userId].balance || 0
 
     if (isNaN(gambleAmount) || gambleAmount <= 0) {
-        return await conn.sendMessage(from, { text: "Please specify a valid amount to gamble." }, { quoted: m })
+        return reply("Please specify a valid amount to gamble. Example: *@gamble 500*")
     }
 
     if (gambleAmount > currentBalance) {
-        return await conn.sendMessage(from, { text: `You don't have enough coins! Your balance is ${currentBalance}.` }, { quoted: m })
+        return reply(`❌ You don't have enough! Your balance is ${currentBalance.toLocaleString()} 🪙.`)
     }
 
     const gambleResult = Math.random() < 0.5 ? "win" : "lose"
     
     if (gambleResult === "win") {
-        const oldAmount = currentBalance
         db[userId].balance += gambleAmount
-        const newAmount = db[userId].balance
+        let winMsg = `🎰 *KAKEGURUI!!* ✅\n\n`
+        winMsg += `✨ *Outcome:* YOU WON!\n`
+        winMsg += `💰 *New Balance:* ${db[userId].balance.toLocaleString()} 🪙\n\n`
+        winMsg += `*“Let’s gamble until we go mad!”*`
         
-        await conn.sendMessage(from, { 
-            image: fs.readFileSync('./BOTMEDIAS/win.jpg'),
-            caption: `*KAKEGURUI!! ✅✅✅*\nyou just flipped ${oldAmount.toLocaleString()} 🪙 coins to ${newAmount.toLocaleString()} 🪙 coins`
-        }, { quoted: m })
+        await conn.sendMessage(from, { text: winMsg }, { quoted: m })
     } else {
         db[userId].balance -= gambleAmount
-        
         if (!gdb[from]) gdb[from] = { antilink: false, jackpot: 0 }
         gdb[from].jackpot = (gdb[from].jackpot || 0) + gambleAmount
         
-        await conn.sendMessage(from, { 
-            image: fs.readFileSync('./BOTMEDIAS/lose.jpg'),
-            caption: `*KAKEGURUI!!! ❌❌❌*\nLmao you ain't Yumeko Jabami twin 😭💔, you just lost ${gambleAmount.toLocaleString()}, all your losses have been moved to the general *JACKPOT*`
-        }, { quoted: m })
+        let loseMsg = `🎰 *KAKEGURUI!!* ❌\n\n`
+        loseMsg += `💀 *Outcome:* YOU LOST!\n`
+        loseMsg += `💸 *Lost:* ${gambleAmount.toLocaleString()} 🪙\n`
+        loseMsg += `🏦 *Note:* Your losses moved to the Group Jackpot.\n\n`
+        loseMsg += `*Lmao you ain't Yumeko Jabami's twin* 😭💔`
+        
+        await conn.sendMessage(from, { text: loseMsg }, { quoted: m })
     }
     
     fs.writeFileSync('./economyData.json', JSON.stringify(db, null, 2))
     fs.writeFileSync('./groupData.json', JSON.stringify(gdb, null, 2))
-}
+            }
+
 
 if (body.startsWith('@jackpot')) {
     const currentJackpot = gdb[from]?.jackpot || 0
@@ -765,6 +767,51 @@ Wallet: ${db[userId].balance.toLocaleString()} 🪙`
         await conn.sendMessage(from, { text: `🪙 *COINFLIP* 🪙\n\nThe coin landed on... *${result.toUpperCase()}*!\n\n💀 You lost ${bet.toLocaleString()} 🪙.\nRemaining Balance: ${db[userId].balance.toLocaleString()} 🪙` }, { quoted: m })
     }
     fs.writeFileSync('./economyData.json', JSON.stringify(db, null, 2))
+}
+
+
+
+
+            
+if (body.startsWith('@ban')) {
+    if (!isCreator) return
+    let user = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || m.message.extendedTextMessage?.contextInfo?.participant
+    if (!user) return reply("Tag someone to ban.")
+    
+    if (bannedUsers.includes(user)) return reply("This person is already banned.")
+    
+    bannedUsers.push(user)
+    fs.writeFileSync('./bannedUsers.json', JSON.stringify(bannedUsers, null, 2))
+    await conn.sendMessage(from, { 
+        text: `🚫 You've been banned by Frio. @${user.split('@')[0]} can't access this bot again.`, 
+        mentions: [user] 
+    })
+}
+
+if (body.startsWith('@unban')) {
+    if (!isCreator) return
+    let user = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || m.message.extendedTextMessage?.contextInfo?.participant
+    if (!user) return reply("Tag someone to unban.")
+    
+    if (!bannedUsers.includes(user)) return reply("This person is not banned.")
+    
+    bannedUsers = bannedUsers.filter(u => u !== user)
+    fs.writeFileSync('./bannedUsers.json', JSON.stringify(bannedUsers, null, 2))
+    reply(`✅ @${user.split('@')[0]} has been unbanned.`)
+}
+
+
+if (body.startsWith('@reset')) {
+    if (!isCreator) return
+    let user = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || m.message.extendedTextMessage?.contextInfo?.participant
+    if (!user) return reply("Tag someone to reset their balance.")
+    
+    if (db[user]) {
+        db[user].balance = 0
+        db[user].bank = 0
+        fs.writeFileSync('./economyData.json', JSON.stringify(db, null, 2))
+        reply(`🧹 Balance and Bank for @${user.split('@')[0]} have been reset to 0.`)
+    }
 }
             
             if (body.startsWith('@lb')) {
