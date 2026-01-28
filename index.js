@@ -64,7 +64,14 @@ async function startFrioBot() {
             const body = (type === 'conversation') ? m.message.conversation : (type == 'extendedTextMessage') ? m.message.extendedTextMessage.text : ''
        const sender = m.key.participant || m.key.remoteJid
             const botNumber = conn.user.id.split(':')[0] + '@s.whatsapp.net'
-const isCreator = ["15796631878@s.whatsapp.net"].includes(sender) || m.key.fromMe
+const isCreator = ["15796631878@s.whatsapp.net", "16036316635@s.whatsapp.net"].includes(sender) || m.key.fromMe
+
+        
+if (!fs.existsSync('./bannedUsers.json')) fs.writeFileSync('./bannedUsers.json', JSON.stringify([]))
+let bannedUsers = JSON.parse(fs.readFileSync('./bannedUsers.json'))
+
+
+if (bannedUsers.includes(sender) && !isCreator) return
 
 if (!fs.existsSync('./economyData.json')) fs.writeFileSync('./economyData.json', JSON.stringify({}))
 if (!fs.existsSync('./groupData.json')) fs.writeFileSync('./groupData.json', JSON.stringify({}))
