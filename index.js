@@ -302,16 +302,7 @@ if (body.startsWith('@menu')) {
 
             
 
-            if (body.startsWith('@kiss')) {
-                let user = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || m.message.extendedTextMessage?.contextInfo?.participant
-                if (!user) return await conn.sendMessage(from, { text: 'You need to tag someone or reply to their message to kiss them!' })
-                await conn.sendMessage(from, { 
-                    video: { url: './BOTMEDIAS/kiss.gif' }, 
-                    gifPlayback: true, 
-                    caption: `You just kissed 💋 @${user.split('@')[0]}`,
-                    mentions: [user] 
-                }, { quoted: m })
-            }
+          
 
             if (body.startsWith('@buypool')) {
     if (!from.endsWith('@g.us')) return await conn.sendMessage(from, { text: 'This command can only be used in groups!' })
@@ -331,25 +322,47 @@ if (body.startsWith('@menu')) {
     await conn.sendMessage(from, { text: `✅ Entry Confirmed!\n\n💰 *Group Jackpot:* ${gdb[from].jackpot.toLocaleString()} 🪙` }, { quoted: m })
             }
 
-            if (body.startsWith('@marry')) {
-                let user = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || m.message.extendedTextMessage?.contextInfo?.participant
-                if (!user) return await conn.sendMessage(from, { text: 'You need to tag someone or reply to their message to marry them!' })
-                await conn.sendMessage(from, { 
-                    video: { url: './BOTMEDIAS/marry.gif' }, 
-                    gifPlayback: true, 
-                    caption: `*CONGRATULATIONS* you've married 🥂 @${user.split('@')[0]}`,
-                    mentions: [user] 
-                }, { quoted: m })
-            }
+            
 
             if (body.startsWith('@hug')) {
                 let user = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || m.message.extendedTextMessage?.contextInfo?.participant
-                if (!user) return await conn.sendMessage(from, { text: 'You need to tag someone or reply to their message to hug them!' })
+                if (!user) return await conn.sendMessage(from, { text: '❌ Tag someone or reply to their message to hug them!' })
+
+                let mentionUser = user === sender ? 'themselves' : `@${user.split('@')[0]}`
+
                 await conn.sendMessage(from, { 
-                    video: { url: './BOTMEDIAS/hug.gif' }, 
+                    video: fs.readFileSync('./BOTMEDIAS/hug.mp4'), 
                     gifPlayback: true, 
-                    caption: `You just hugged 🤗 @${user.split('@')[0]}`,
-                    mentions: [user] 
+                    caption: `@${sender.split('@')[0]} gave ${mentionUser} a warm hug! 🫂❤️`,
+                    mentions: [sender, user] 
+                }, { quoted: m })
+            }
+
+            if (body.startsWith('@headpat')) {
+                let user = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || m.message.extendedTextMessage?.contextInfo?.participant
+                if (!user) return await conn.sendMessage(from, { text: '❌ Tag someone or reply to their message to give them a headpat!' })
+
+                let mentionUser = user === sender ? 'themselves' : `@${user.split('@')[0]}`
+
+                await conn.sendMessage(from, { 
+                    video: fs.readFileSync('./BOTMEDIAS/headpat.mp4'), 
+                    gifPlayback: true, 
+                    caption: `@${sender.split('@')[0]} gently patted ${mentionUser}'s head! 👋💖`,
+                    mentions: [sender, user] 
+                }, { quoted: m })
+            }
+
+            if (body.startsWith('@stare')) {
+                let user = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || m.message.extendedTextMessage?.contextInfo?.participant
+                if (!user) return await conn.sendMessage(from, { text: '❌ Tag someone or reply to their message to stare at them!' })
+
+                let mentionUser = user === sender ? 'themselves' : `@${user.split('@')[0]}`
+
+                await conn.sendMessage(from, { 
+                    video: fs.readFileSync('./BOTMEDIAS/stare.mp4'), 
+                    gifPlayback: true, 
+                    caption: `@${sender.split('@')[0]} is staring intensely at ${mentionUser}...`,
+                    mentions: [sender, user] 
                 }, { quoted: m })
             }
 
@@ -364,45 +377,75 @@ if (body.startsWith('@kaminari')) {
                 await conn.sendMessage(from, { 
                     video: fs.readFileSync('./BOTMEDIAS/kaminari.mp4'), 
                     gifPlayback: true, 
-                    caption: `*@${sender.split('@')[0]} KAMINARIED ⚡⚡ ${mentionUser}* 👋💥`,
+                    caption: `@${sender.split('@')[0]} KAMINARIED ⚡⚡ ${mentionUser}`,
                     mentions: [sender, user] 
                 }, { quoted: m })
 }
 
-            
-            if (body.startsWith('@headpat')) {
+
+if (body.startsWith('@slap')) {
                 let user = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || m.message.extendedTextMessage?.contextInfo?.participant
-                if (!user) return await conn.sendMessage(from, { text: 'You need to tag someone or reply to their message to headpat them!' })
+                if (!user) return await conn.sendMessage(from, { text: '❌ Tag someone or reply to their message to slap them!' })
+
+                let mentionUser = user === sender ? 'themselves' : `@${user.split('@')[0]}`
+
                 await conn.sendMessage(from, { 
-                    video: { url: './BOTMEDIAS/headpat.gif' }, 
+                    video: fs.readFileSync('./BOTMEDIAS/slap.mp4'), 
                     gifPlayback: true, 
-                    caption: `You just gave @${user.split('@')[0]} a head pat 🐰`,
-                    mentions: [user] 
+                    caption: `@${sender.split('@')[0]} slapped ${mentionUser} 👋💥`,
+                    mentions: [sender, user] 
                 }, { quoted: m })
             }
 
-            if (body.startsWith('@stare')) {
+            if (body.startsWith('@kiss')) {
                 let user = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || m.message.extendedTextMessage?.contextInfo?.participant
-                if (!user) return await conn.sendMessage(from, { text: 'You need to tag someone or reply to their message to stare at them!' })
+                if (!user) return await conn.sendMessage(from, { text: '❌ Tag someone or reply to their message to kiss them!' })
+
+                let mentionUser = user === sender ? 'themselves' : `@${user.split('@')[0]}`
+
                 await conn.sendMessage(from, { 
-                    video: { url: './BOTMEDIAS/stare.gif' }, 
+                    video: fs.readFileSync('./BOTMEDIAS/kiss.mp4'), 
                     gifPlayback: true, 
-                    caption: `You just hit @${user.split('@')[0]} with the stare 🗿`,
-                    mentions: [user] 
+                    caption: `@${sender.split('@')[0]} kissed ${mentionUser} 💋✨`,
+                    mentions: [sender, user] 
+                }, { quoted: m })
+            }
+
+            if (body.startsWith('@marry')) {
+                let user = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || m.message.extendedTextMessage?.contextInfo?.participant
+                if (!user) return await conn.sendMessage(from, { text: '❌ Tag someone or reply to their message to propose!' })
+
+                let mentionUser = user === sender ? 'themselves' : `@${user.split('@')[0]}`
+
+                await conn.sendMessage(from, { 
+                    video: fs.readFileSync('./BOTMEDIAS/marry.mp4'), 
+                    gifPlayback: true, 
+                    caption: `@${sender.split('@')[0]} just married ${mentionUser} 💍❤️`,
+                    mentions: [sender, user] 
                 }, { quoted: m })
             }
 
             if (body.startsWith('@wham')) {
                 let user = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || m.message.extendedTextMessage?.contextInfo?.participant
-                if (!user) return await conn.sendMessage(from, { text: 'You need to tag someone or reply to their message to wham them!' })
+                if (!user) return await conn.sendMessage(from, { text: '❌ Tag someone or reply to their message to WHAM them!' })
+
+                let mentionUser = user === sender ? 'themselves' : `@${user.split('@')[0]}`
+
                 await conn.sendMessage(from, { 
-                    video: { url: './BOTMEDIAS/wham.gif' }, 
+                    video: fs.readFileSync('./BOTMEDIAS/wham.mp4'), 
                     gifPlayback: true, 
-                    caption: `You just WHAMMIED ‼️ TF outta @${user.split('@')[0]}`,
-                    mentions: [user] 
+                    caption: `@${sender.split('@')[0]} JUST WHAMMIED TF OUTTA ${mentionUser} 🔨💥`,
+                    mentions: [sender, user] 
                 }, { quoted: m })
             }
 
+
+
+
+            
+            
+
+            
 
             if (body.startsWith('@gamble')) {
     const args = body.split(' ')
