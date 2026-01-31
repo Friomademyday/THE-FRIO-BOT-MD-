@@ -322,7 +322,89 @@ if (body.startsWith('@menu')) {
     await conn.sendMessage(from, { text: `✅ Entry Confirmed!\n\n💰 *Group Jackpot:* ${gdb[from].jackpot.toLocaleString()} 🪙` }, { quoted: m })
             }
 
-            
+            if (body.startsWith('@gatling')) {
+                let user = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || m.message.extendedTextMessage?.contextInfo?.participant
+                if (!user) return await conn.sendMessage(from, { text: '❌ Tag someone to unleash Gatling!' })
+
+                let mentionUser = user === sender ? 'themselves' : `@${user.split('@')[0]}`
+
+                await conn.sendMessage(from, { 
+                    video: fs.readFileSync('./BOTMEDIAS/gatling.mp4'), 
+                    gifPlayback: true, 
+                    caption: `@${sender.split('@')[0]} unleashed GOMU GOMU NO GATLING on ${mentionUser}!! 👊💥👊💥`,
+                    mentions: [sender, user] 
+                }, { quoted: m })
+            }
+
+            if (body.startsWith('@redhawk')) {
+                let user = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || m.message.extendedTextMessage?.contextInfo?.participant
+                if (!user) return await conn.sendMessage(from, { text: '❌ Tag someone to hit them with Red Hawk!' })
+
+                let mentionUser = user === sender ? 'themselves' : `@${user.split('@')[0]}`
+
+                await conn.sendMessage(from, { 
+                    video: fs.readFileSync('./BOTMEDIAS/redhawk.mp4'), 
+                    gifPlayback: true, 
+                    caption: `@${sender.split('@')[0]} blasted ${mentionUser} with RED HAWK!! 🔥🦅👊`,
+                    mentions: [sender, user] 
+                }, { quoted: m })
+            }
+
+            if (body.startsWith('@kamehameha')) {
+                let user = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || m.message.extendedTextMessage?.contextInfo?.participant
+                if (!user) return await conn.sendMessage(from, { text: '❌ Tag someone to blast them!' })
+
+                let mentionUser = user === sender ? 'themselves' : `@${user.split('@')[0]}`
+
+                await conn.sendMessage(from, { 
+                    video: fs.readFileSync('./BOTMEDIAS/kamehameha.mp4'), 
+                    gifPlayback: true, 
+                    caption: `@${sender.split('@')[0]} unleashed a massive KAMEHAMEHA on ${mentionUser}!! 🌀⚡`,
+                    mentions: [sender, user] 
+                }, { quoted: m })
+            }
+
+            if (body.startsWith('@rasengan')) {
+                let user = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || m.message.extendedTextMessage?.contextInfo?.participant
+                if (!user) return await conn.sendMessage(from, { text: '❌ Tag someone to hit them with Rasengan!' })
+
+                let mentionUser = user === sender ? 'themselves' : `@${user.split('@')[0]}`
+
+                await conn.sendMessage(from, { 
+                    video: fs.readFileSync('./BOTMEDIAS/rasengan.mp4'), 
+                    gifPlayback: true, 
+                    caption: `@${sender.split('@')[0]} slammed a RASENGAN into ${mentionUser}!! 🌀💨`,
+                    mentions: [sender, user] 
+                }, { quoted: m })
+            }
+
+            if (body.startsWith('@getsugatensho')) {
+                let user = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || m.message.extendedTextMessage?.contextInfo?.participant
+                if (!user) return await conn.sendMessage(from, { text: '❌ Tag someone to slash them!' })
+
+                let mentionUser = user === sender ? 'themselves' : `@${user.split('@')[0]}`
+
+                await conn.sendMessage(from, { 
+                    video: fs.readFileSync('./BOTMEDIAS/getsugatensho.mp4'), 
+                    gifPlayback: true, 
+                    caption: `@${sender.split('@')[0]} unleashed GETSUGA TENSHO on ${mentionUser}!! 🌙⚔️`,
+                    mentions: [sender, user] 
+                }, { quoted: m })
+            }
+
+            if (body.startsWith('@blackmamba')) {
+                let user = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || m.message.extendedTextMessage?.contextInfo?.participant
+                if (!user) return await conn.sendMessage(from, { text: '❌ Tag someone to strike them!' })
+
+                let mentionUser = user === sender ? 'themselves' : `@${user.split('@')[0]}`
+
+                await conn.sendMessage(from, { 
+                    video: fs.readFileSync('./BOTMEDIAS/blackmamba.mp4'), 
+                    gifPlayback: true, 
+                    caption: `@${sender.split('@')[0]} unleashed GOMU GOMU NO BLACK MAMBA on ${mentionUser}!! 🐍💨👊`,
+                    mentions: [sender, user] 
+                }, { quoted: m })
+            }
 
             if (body.startsWith('@hug')) {
                 let user = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || m.message.extendedTextMessage?.contextInfo?.participant
